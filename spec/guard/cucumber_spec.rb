@@ -12,7 +12,8 @@ describe Guard::Cucumber do
         :all_on_start   => true,
         :keep_failed    => true,
         :cli            => '--no-profile --color --format progress --strict',
-        :feature_sets   => ['features']
+        :feature_sets   => ['features'],
+        :paths_from_profile => false
     }
   end
 
@@ -33,6 +34,10 @@ describe Guard::Cucumber do
         guard.options[:keep_failed].should be_true
       end
 
+      it 'sets a default :paths_from_profile option' do
+        guard.options[:paths_from_profile].should be_false
+      end
+
       it 'sets a default :cli option' do
         guard.options[:cli].should eql '--no-profile --color --format progress --strict'
       end
@@ -46,6 +51,7 @@ describe Guard::Cucumber do
       let(:guard) { Guard::Cucumber.new(nil, { :all_after_pass => false,
                                                :all_on_start   => false,
                                                :keep_failed    => false,
+                                               :paths_from_profile    => true,
                                                :cli            => '--color',
                                                :feature_sets   => ['feature_set_a', 'feature_set_b'],
                                                :focus_on       => '@focus' }) }
@@ -56,6 +62,10 @@ describe Guard::Cucumber do
 
       it 'sets the provided :all_on_start option' do
         guard.options[:all_on_start].should be_false
+      end
+
+      it 'sets the provided :paths_from_profile option' do
+        guard.options[:paths_from_profile].should be_true
       end
 
       it 'sets the provided :keep_failed option' do
@@ -167,6 +177,16 @@ describe Guard::Cucumber do
         guard.run_all
       end
     end
+
+    context 'with a :paths_from_profile option' do
+      let(:guard) { Guard::Cucumber.new([], { :paths_from_profile => true }) }
+
+      it 'sends an empty path set to the runner' do
+        runner.should_receive(:run).with([], default_options.merge(:paths_from_profile     => true,
+                                                                             :message => 'Running all features')).and_return(true)
+        guard.run_all
+      end
+    end
   end
 
   describe '#reload' do
@@ -215,6 +235,15 @@ describe Guard::Cucumber do
 
       it 'directly passes the :cli option to the runner' do
         runner.should_receive(:run).with(['features'], default_options.merge(:cli => '--color', :message => 'Running all features')).and_return(true)
+        guard.run_on_changes(['features'])
+      end
+    end
+
+    context 'with a :paths_from_profile option' do
+      let(:guard) { Guard::Cucumber.new([], { :paths_from_profile => true }) }
+
+      it 'passes no paths to the runner' do
+        runner.should_receive(:run).with([], default_options.merge(:paths_from_profile => true)).and_return(true)
         guard.run_on_changes(['features'])
       end
     end

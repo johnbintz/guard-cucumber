@@ -14,6 +14,13 @@ describe Guard::Cucumber::Runner do
       it 'returns false' do
         runner.run([]).should be_false
       end
+
+      context 'when :paths_from_profile is true' do
+        it 'should run without paths, relying on the profile for path information' do
+          runner.should_receive(:system)
+          runner.run([], { :paths_from_profile => true })
+        end
+      end
     end
 
     context 'with a paths argument' do

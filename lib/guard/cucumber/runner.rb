@@ -18,7 +18,7 @@ module Guard
         # @return [Boolean] the status of the execution
         #
         def run(paths, options = { })
-          return false if paths.empty?
+          return false if paths.empty? and !options[:paths_from_profile]
 
           message = options[:message] || (paths == ['features'] ? "Running all Cucumber features: #{ cucumber_command(paths, options) }" : "Running Cucumber features: #{ cucumber_command(paths, options) }")
           paths   = options[:focus_on] ? Focuser.focus(paths, options[:focus_on]) : paths

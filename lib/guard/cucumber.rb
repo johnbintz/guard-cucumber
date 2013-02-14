@@ -39,7 +39,8 @@ module Guard
           :all_on_start   => true,
           :keep_failed    => true,
           :cli            => '--no-profile --color --format progress --strict',
-          :feature_sets   => ['features']
+          :feature_sets   => ['features'],
+          :paths_from_profile => false
       }.update(options)
 
       @last_failed  = false
@@ -59,7 +60,9 @@ module Guard
     # @raise [:task_has_failed] when stop has failed
     #
     def run_all
-      passed = Runner.run(options[:feature_sets], options.merge(options[:run_all] || { }).merge(:message => 'Running all features'))
+      feature_sets = options[:paths_from_profile] ? [] : options[:feature_sets]
+
+      passed = Runner.run(feature_sets, options.merge(options[:run_all] || { }).merge(:message => 'Running all features'))
 
       if passed
         @failed_paths = []
@@ -86,8 +89,13 @@ module Guard
     # @raise [:task_has_failed] when stop has failed
     #
     def run_on_changes(paths)
-      paths += @failed_paths if @options[:keep_failed]
-      paths   = Inspector.clean(paths, options[:feature_sets])
+      if options[:paths_from_profile]
+        paths = []
+      else
+        paths += @failed_paths if @options[:keep_failed]
+        paths   = Inspector.clean(paths, options[:feature_sets])
+      end
+
       options = @options[:change_format] ? change_format(@options[:change_format]) : @options
       passed  = Runner.run(paths, paths.include?('features') ? options.merge({ :message => 'Running all features' }) : options)
 

@@ -107,6 +107,11 @@ Former `:color`, `:drb`, `:port` and `:profile` options are thus deprecated and 
                                   # If '@dev' is on line 6 in 'foo.feature',
                                   # this example runs: 'bundle exec cucumber foo.feature:6'
                                   # default: nil
+
+:paths_from_profile => true       # Instead of receiving path information from Guard,
+                                  # it uses the information from the Cucumber profile to determine
+                                  # which features/scenarios to run.
+                                  # default: false
 ```
 
 ## Cucumber configuration
